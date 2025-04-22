@@ -2,64 +2,114 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Fetch de Código do GitHub</title>
+  <title>Buscar Código Arduino do GitHub</title>
   <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    label, input, button {
+      display: block;
+      margin-bottom: 10px;
+    }
     pre {
-      background-color: #f0f0f0;
+      background-color: #f4f4f4;
       padding: 10px;
       border-radius: 5px;
-      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
-    .filename {
-      font-weight: bold;
-      margin-top: 10px;
+    #output {
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>Simulador de Pasta `src/`</h1>
-  <div id="src-folder"></div>
+  <h2>Buscar Código do GitHub (Arduino)</h2>
+  <label for="usuario">Usuário do GitHub:</label>
+  <input type="text" id="usuario" value="rbeninca" placeholder="ex: arduino-labs" />
+
+  <label for="repositorio">Repositório:</label>
+  <input type="text" id="repositorio" value="simuladorGeladeira" placeholder="ex: meu-projeto-arduino" />
+
+  <button onclick="buscarArquivo()">Buscar arquivo src/main.ino</button>
+
+  <div id="output"></div>
 
   <script>
-    const arquivos = [
-      {
-        nome: 'main.js',
-        url: 'https://raw.githubusercontent.com/rbeninca/ddm/refs/heads/master/app/src/main/java/com/ifsc/contaclick/MainActivity.java'
-      },
-      {
-        nome: 'utils.js',
-        url: 'https://raw.githubusercontent.com/rbeninca/ddm/refs/heads/master/app/src/main/java/com/ifsc/contaclick/MainActivity.java'
+
+
+      class CarregaFontesGitHub {
+      constructor(usuario, repositorio, caminho = "src/controle.ino", branch = "main") {
+        this.usuario = usuario;
+        this.repositorio = repositorio;
+        this.caminho = caminho;
+        this.branch = branch;
       }
-    ];
 
-    const pastaSrc = document.getElementById('src-folder');
+      async getSrc() {
+        const url = `https://raw.githubusercontent.com/${this.usuario}/${this.repositorio}/${this.branch}/${this.caminho}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Erro ${response.status}: Não foi possível carregar o arquivo.`);
+        }
+        return await response.text();
+      }
+    }
 
-    arquivos.forEach(arquivo => {
-      fetch(arquivo.url)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Erro ao carregar ${arquivo.nome}`);
-          }
-          return response.text();
-        })
+    function buscarArquivo() {
+      const usuario = document.getElementById("usuario").value.trim();
+      const repositorio = document.getElementById("repositorio").value.trim();
+      const output = document.getElementById("output");
+      output.innerHTML = "";
+
+      if (!usuario || !repositorio) {
+        output.textContent = "Por favor, preencha os dois campos.";
+        return;
+      }
+
+      const carregador = new CarregaFontesGitHub(usuario, repositorio);
+
+      carregador.getSrc()
         .then(codigo => {
-          const filename = document.createElement('div');
-          filename.className = 'filename';
-          filename.textContent = `src/${arquivo.nome}`;
-
-          const pre = document.createElement('pre');
+          const titulo = document.createElement("div");
+          titulo.innerHTML = `<strong>Arquivo:</strong> src/controle.ino`;
+          const pre = document.createElement("pre");
           pre.textContent = codigo;
-
-          pastaSrc.appendChild(filename);
-          pastaSrc.appendChild(pre);
+          output.appendChild(titulo);
+          output.appendChild(pre);
         })
-        .catch(error => {
-          console.error(error);
-          const erroMsg = document.createElement('div');
-          erroMsg.textContent = `Erro ao carregar ${arquivo.nome}: ${error.message}`;
-          pastaSrc.appendChild(erroMsg);
+        .catch(err => {
+          output.textContent = `Erro ao buscar o arquivo: ${err.message}`;
         });
+    }
+  
+    // Adiciona o evento de clique ao botão
+    const botao = document.querySelector("button");
+    botao.addEventListener("click", () => {
+      const usuario = document.getElementById("usuario").value.trim();
+      const repositorio = document.getElementById("repositorio").value.trim();
+      if (usuario && repositorio) {
+        const carregador = new CarregaFontesGitHub(usuario, repositorio);
+        carregador.getSrc()
+          .then(codigo => {
+            const output = document.getElementById("output");
+            const titulo = document.createElement("div");
+            titulo.innerHTML = `<strong>Arquivo:</strong> src/controle.ino`;
+            const pre = document.createElement("pre");
+            pre.textContent = codigo;
+            output.appendChild(titulo);
+            output.appendChild(pre);
+          })
+          .catch(err => {
+            console.error(`Erro ao carregar o arquivo: ${err.message}`);
+          });
+      }
     });
+  //==========================================================================
+  carregaArquivos = new CarregaFontesGitHub("rbeninca", "simuladorGeladeira");
+  botao.click();
+
   </script>
 </body>
 </html>

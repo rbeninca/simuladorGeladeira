@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Simulador de Geladeira</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+    .painel {
+      background: #fff; padding: 15px; border-radius: 10px;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.2); max-width: 600px; margin: auto;
+    }
+    button { margin: 5px; }
+    .status { margin-top: 20px; font-size: 1.1em; line-height: 1.5; }
+    .ativo { color: green; font-weight: bold; }
+    .inativo { color: gray; }
+  </style>
+</head>
+<body>
+  <div class="painel">
+    <h2>Simulador de Geladeira</h2>
+    <button onclick="toggleCompressor()">Toggle Compressor</button>
+    <button onclick="togglePortaFreezer()">Toggle Porta Freezer</button>
+    <button onclick="togglePortaGeladeira()">Toggle Porta Geladeira</button>
+    <button onclick="toggleResistencia()">Toggle Resistência</button>
+    <button onclick="toggleVentoinhaCompressor()">Toggle Ventoinha Compressor</button>
+    <button onclick="toggleVentoinhaFreezer()">Toggle Ventoinha Freezer</button>
+    <button onclick="aumentarVelocidade()">+Velocidade</button>
+    <button onclick="diminuirVelocidade()">-Velocidade</button>
+
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    class SimuladorGeladeira {
+      constructor() {
+        this.tempAmbiente = 25;
+        this.tempFreezer = this.tempAmbiente;
+        this.tempResistencia = 20;
+        this.tempMotor = this.tempAmbiente;
+
+        this.compressorLigado = false;
+        this.resistenciaLigada = false;
+        this.portaFreezerAberta = false;
+        this.portaGeladeiraAberta = false;
+
+        this.ventoinhaCompressor = false;
+        this.ventoinhaFreezer = false;
+        this.luzFreezer = false;
+        this.luzGeladeira = false;
+
+        this.velocidadeSimulada = 1;
+      }
+
+      tick(deltaTempoSegundos) {
+        const dt = deltaTempoSegundos * this.velocidadeSimulada;
+
+        // Lógica de luzes baseada nas portas
+        this.luzFreezer = this.portaFreezerAberta;
+        this.luzGeladeira = this.portaGeladeiraAberta;
+
+        // Temperatura do motor do compressor (curva suave exponencial)
+        const limiteCompressor = this.compressorLigado
+          ? (this.ventoinhaCompressor ? 80 : 130)
+          : this.tempAmbiente;
+        const taxaMotor = 0.02;
+        this.tempMotor += (limiteCompressor - this.tempMotor) * taxaMotor * dt;
+
+        // Temperatura do freezer (com curva exponencial)
+        const limiteFreezer = -30;
+        if (this.compressorLigado && !this.portaFreezerAberta) {
+          const taxa = this.ventoinhaFreezer ? 0.05 : 0.03;
+          this.tempFreezer += (limiteFreezer - this.tempFreezer) * taxa * dt;
+        } else {
+          // Sobe gradualmente em direção à temp ambiente
+          const subidaBase = 0.002;
+          const fatorPorta = this.portaFreezerAberta ? (this.ventoinhaFreezer ? 0.05 : 0.02) : subidaBase;
+          this.tempFreezer += (this.tempAmbiente - this.tempFreezer) * fatorPorta * dt;
+        }
+
+        // Simula a resistência
+        if (this.resistenciaLigada) {
+          this.tempResistencia += 0.4 * dt;
+        } else {
+          this.tempResistencia -= 0.1 * dt;
+        }
+
+        // Limites
+        this.tempFreezer = Math.max(-30, Math.min(this.tempAmbiente, this.tempFreezer));
+        this.tempMotor = Math.max(20, Math.min(150, this.tempMotor));
+        this.tempResistencia = Math.max(20, Math.min(200, this.tempResistencia));
+
+        this.atualizarInterface();
+      }
+
+      atualizarInterface() {
+        const statusDiv = document.getElementById("status");
+
+        const ligado = (estado) => estado ? '<span class="ativo">Ligado</span>' : '<span class="inativo">Desligado</span>';
+        const aberto = (estado) => estado ? '<span class="ativo">Aberta</span>' : '<span class="inativo">Fechada</span>';
+
+        statusDiv.innerHTML = `
+          <strong>Temperaturas:</strong><br>
+          - Ambiente: ${this.tempAmbiente.toFixed(1)}°C<br>
+          - Freezer: ${this.tempFreezer.toFixed(1)}°C<br>
+          - Resistência: ${this.tempResistencia.toFixed(1)}°C<br>
+          - Motor Compressor: ${this.tempMotor.toFixed(1)}°C<br><br>
+
+          <strong>Componentes:</strong><br>
+          - Porta do Freezer: ${aberto(this.portaFreezerAberta)}<br>
+          - Porta da Geladeira: ${aberto(this.portaGeladeiraAberta)}<br>
+          - Compressor: ${ligado(this.compressorLigado)}<br>
+          - Resistência: ${ligado(this.resistenciaLigada)}<br>
+          - Ventoinha Compressor: ${ligado(this.ventoinhaCompressor)}<br>
+          - Ventoinha Freezer: ${ligado(this.ventoinhaFreezer)}<br>
+          - Luz Freezer: ${ligado(this.luzFreezer)}<br>
+          - Luz Geladeira: ${ligado(this.luzGeladeira)}<br><br>
+
+          <strong>Velocidade do Tempo:</strong> x${this.velocidadeSimulada}
+        `;
+      }
+    }
+
+    const geladeira = new SimuladorGeladeira();
+
+    setInterval(() => {
+      geladeira.tick(1);
+    }, 1000);
+
+    // Controles independentes
+    function toggleCompressor() {
+      geladeira.compressorLigado = !geladeira.compressorLigado;
+    }
+
+    function togglePortaFreezer() {
+      geladeira.portaFreezerAberta = !geladeira.portaFreezerAberta;
+    }
+
+    function togglePortaGeladeira() {
+      geladeira.portaGeladeiraAberta = !geladeira.portaGeladeiraAberta;
+    }
+
+    function toggleResistencia() {
+      geladeira.resistenciaLigada = !geladeira.resistenciaLigada;
+    }
+
+    function toggleVentoinhaCompressor() {
+      geladeira.ventoinhaCompressor = !geladeira.ventoinhaCompressor;
+    }
+
+    function toggleVentoinhaFreezer() {
+      geladeira.ventoinhaFreezer = !geladeira.ventoinhaFreezer;
+    }
+
+    function aumentarVelocidade() {
+      geladeira.velocidadeSimulada = Math.min(10, geladeira.velocidadeSimulada + 1);
+    }
+
+    function diminuirVelocidade() {
+      geladeira.velocidadeSimulada = Math.max(1, geladeira.velocidadeSimulada - 1);
+    }
+  </script>
+</body>
+</html>
