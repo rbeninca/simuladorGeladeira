@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Fetch de Código do GitHub</title>
+  <style>
+    pre {
+      background-color: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    .filename {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Simulador de Pasta `src/`</h1>
+  <div id="src-folder"></div>
+
+  <script>
+    const arquivos = [
+      {
+        nome: 'main.js',
+        url: 'https://raw.githubusercontent.com/rbeninca/ddm/refs/heads/master/app/src/main/java/com/ifsc/contaclick/MainActivity.java'
+      },
+      {
+        nome: 'utils.js',
+        url: 'https://raw.githubusercontent.com/rbeninca/ddm/refs/heads/master/app/src/main/java/com/ifsc/contaclick/MainActivity.java'
+      }
+    ];
+
+    const pastaSrc = document.getElementById('src-folder');
+
+    arquivos.forEach(arquivo => {
+      fetch(arquivo.url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Erro ao carregar ${arquivo.nome}`);
+          }
+          return response.text();
+        })
+        .then(codigo => {
+          const filename = document.createElement('div');
+          filename.className = 'filename';
+          filename.textContent = `src/${arquivo.nome}`;
+
+          const pre = document.createElement('pre');
+          pre.textContent = codigo;
+
+          pastaSrc.appendChild(filename);
+          pastaSrc.appendChild(pre);
+        })
+        .catch(error => {
+          console.error(error);
+          const erroMsg = document.createElement('div');
+          erroMsg.textContent = `Erro ao carregar ${arquivo.nome}: ${error.message}`;
+          pastaSrc.appendChild(erroMsg);
+        });
+    });
+  </script>
+</body>
+</html>
+<!--
+  Este código HTML simula uma pasta `src/` e carrega arquivos JavaScript de um repositório do GitHub.
+  Os arquivos são exibidos com seus nomes e conteúdo.
+  Certifique-se de substituir os URLs pelos corretos do seu repositório.
