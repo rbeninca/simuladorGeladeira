@@ -1,156 +1,105 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Simulador de Geladeira</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-            background: #f0f0f0;
-        }
-
-        .painel {
-            background: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-            max-width: 800px;
-            margin: auto;
-        }
-
-        button,
-        input[type=range] {
-            margin: 5px;
-        }
-
-        .status {
-            margin-top: 20px;
-            font-size: 1.1em;
-            line-height: 1.5;
-        }
-
-        .ativo {
-            color: green;
-            font-weight: bold;
-        }
-
-        .inativo {
-            color: gray;
-        }
-
-        canvas {
-            margin-top: 30px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Simulador de Geladeira</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+    .painel {
+      background: #fff; padding: 15px; border-radius: 10px;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.2); max-width: 800px; margin: auto;
+    }
+    button { margin: 5px; }
+    .status { margin-top: 20px; font-size: 1.1em; line-height: 1.5; }
+    .ativo { color: green; font-weight: bold; }
+    .inativo { color: gray; }
+    canvas { margin-top: 30px; }
+  </style>
 </head>
-
 <body>
-    <div class="painel">
-        <button onclick="togglePause()" id="pauseButton">Pausar</button>
-        <button onclick="toggleCompressor()">Toggle Compressor</button>
-        <button onclick="togglePortaFreezer()">Toggle Porta Freezer</button>
-        <button onclick="togglePortaGeladeira()">Toggle Porta Geladeira</button>
-        <button onclick="toggleResistencia()">Toggle Resistência</button>
-        <button onclick="toggleVentoinhaCompressor()">Toggle Ventoinha Compressor</button>
-        <button onclick="toggleVentoinhaFreezer()">Toggle Ventoinha Freezer</button>
+  <div class="painel">
+    <button onclick="togglePause()" id="pauseButton">Pausar</button>
+    <button onclick="toggleCompressor()">Toggle Compressor</button>
+    <button onclick="togglePortaFreezer()">Toggle Porta Freezer</button>
+    <button onclick="togglePortaGeladeira()">Toggle Porta Geladeira</button>
+    <button onclick="toggleResistencia()">Toggle Resistência</button>
+    <button onclick="toggleVentoinhaCompressor()">Toggle Ventoinha Compressor</button>
+    <button onclick="toggleVentoinhaFreezer()">Toggle Ventoinha Freezer</button>
 
-        <br><label for="tempoSlider">Velocidade do tempo (1s até 10min):</label>
-        <input type="range" id="tempoSlider" min="1" max="100" value="1" step="1" oninput="atualizarVelocidade()">
-        <span id="tempoDisplay">1s</span>
+    <div class="status" id="status"></div>
+    <canvas id="graficoTemperaturas" width="700" height="300"></canvas>
+  </div>
 
-        <div class="status" id="status"></div>
-        <canvas id="graficoTemperaturas" width="700" height="300"></canvas>
-    </div>
+  <script>
+    class SimuladorGeladeira {
+      constructor() {
+        this.tempAmbiente = 25;
+        this.tempFreezer = this.tempAmbiente;
+        this.tempResistencia = 20;
+        this.tempEvaporador = this.tempAmbiente;
+        this.tempMotor = this.tempAmbiente;
 
-    <script>
-        class SimuladorGeladeira {
-            constructor() {
-                this.tempAmbiente = 25;
-                this.tempFreezer = this.tempAmbiente;
-                this.tempResistencia = this.tempAmbiente;
-                this.tempEvaporador = this.tempAmbiente;
-                this.tempMotor = this.tempAmbiente;
+        this.compressorLigado = false;
+        this.resistenciaLigada = false;
+        this.portaFreezerAberta = false;
+        this.portaGeladeiraAberta = false;
 
-                this.compressorLigado = false;
-                this.resistenciaLigada = false;
-                this.portaFreezerAberta = false;
-                this.portaGeladeiraAberta = false;
+        this.ventoinhaCompressor = false;
+        this.ventoinhaFreezer = false;
+        this.luzFreezer = false;
+        this.luzGeladeira = false;
+      }
 
-                this.ventoinhaCompressor = false;
-                this.ventoinhaFreezer = false;
-                this.luzFreezer = false;
-                this.luzGeladeira = false;
-            }
+      atualizar(dt) {
+        this.luzFreezer = this.portaFreezerAberta;
+        this.luzGeladeira = this.portaGeladeiraAberta;
 
-            tick(dt) {
-                this.luzFreezer = this.portaFreezerAberta;
-                this.luzGeladeira = this.portaGeladeiraAberta;
+        const limiteCompressor = this.compressorLigado
+          ? (this.ventoinhaCompressor ? 80 : 130)
+          : this.tempAmbiente;
+        const taxaMotor = 0.002;
+        this.tempMotor += (limiteCompressor - this.tempMotor) * taxaMotor * dt;
 
-                const limiteCompressor = this.compressorLigado
-                    ? (this.ventoinhaCompressor ? 80 : 130)
-                    : this.tempAmbiente;
-                const taxaMotor = 0.002;
-                this.tempMotor += (limiteCompressor - this.tempMotor) * taxaMotor * dt;
+        const limiteFreezer = -30;
+        if (this.compressorLigado && !this.portaFreezerAberta) {
+          const taxa = this.ventoinhaFreezer ? 0.001 : 0.0005;
+          this.tempFreezer += (limiteFreezer - this.tempFreezer) * taxa * dt;
+        } else {
+          const subidaBase = 0.0002;
+          const fatorPorta = this.portaFreezerAberta ? (this.ventoinhaFreezer ? 0.005 : 0.002) : subidaBase;
+          const ajusteAmbienteFechado = this.portaFreezerAberta ? fatorPorta : 0.00005;
+          this.tempFreezer += (this.tempAmbiente - this.tempFreezer) * ajusteAmbienteFechado * dt;
+        }
 
-                const limiteFreezer = -30;
-                if (this.compressorLigado && !this.portaFreezerAberta) {
-                    const taxa = this.ventoinhaFreezer ? 0.0025 : 0.00015;
-                    this.tempFreezer += (limiteFreezer - this.tempFreezer) * taxa * dt;
-                } else {
-                    const subidaBase = 0.0002;
-                    const fatorPorta = this.portaFreezerAberta ? (this.ventoinhaFreezer ? 0.005 : 0.002) : subidaBase;
-                    this.tempFreezer += (this.tempAmbiente - this.tempFreezer) * fatorPorta * dt;
+        if (this.resistenciaLigada) {
+          const limiteQueima = 70;
+          this.tempResistencia += (limiteQueima - this.tempResistencia) * 0.01 * dt;
+        } else {
+          this.tempResistencia += (this.tempFreezer - this.tempResistencia) * 0.05 * dt;
+        }
 
-                }
+        if (this.compressorLigado && !this.resistenciaLigada) {
+          this.tempEvaporador += (-25 - this.tempEvaporador) * 0.0025 * dt;
+        } else if (this.compressorLigado && this.resistenciaLigada) {
+          const equilibrio = (this.tempResistencia - 10);
+          this.tempEvaporador += (equilibrio - this.tempEvaporador) * 0.005 * dt;
+        } else if (this.resistenciaLigada) {
+          this.tempEvaporador += (this.tempResistencia - this.tempEvaporador) * 0.01 * dt;
+        } else {
+          const taxaEvaporadorAmbiente = this.portaFreezerAberta ? 0.001 : 0.0001;
+          this.tempEvaporador += (this.tempAmbiente - this.tempEvaporador) * taxaEvaporadorAmbiente * dt;
+        }
 
+        const fatorTransferencia = this.ventoinhaFreezer ? 0.002 : 0.001;
+        this.tempFreezer += (this.tempEvaporador - this.tempFreezer) * fatorTransferencia * dt;
 
-                this.tempMotor = Math.max(20, Math.min(150, this.tempMotor));
-                this.tempResistencia = Math.max(20, Math.min(200, this.tempResistencia));
-                this.tempMotor = Math.max(20, Math.min(150, this.tempMotor));
+        this.atualizarInterface();
+        atualizarGrafico(this.tempAmbiente, this.tempFreezer, this.tempEvaporador, this.tempResistencia, this.tempMotor);
+      }
 
-
-
-                if (this.resistenciaLigada) {
-                    const limiteQueima = 70;
-                    this.tempResistencia += (limiteQueima - this.tempResistencia) * 0.01 * dt;
-                } else {
-                    this.tempResistencia += (this.tempFreezer - this.tempResistencia) * 0.05 * dt;
-                }
-
-
-                // Temperatura do evaporador
-                if (this.compressorLigado && !this.resistenciaLigada) {
-                    this.tempEvaporador += (-30 - this.tempEvaporador) * 0.005 * dt;
-                } else if (this.compressorLigado && this.resistenciaLigada) {
-                    const equilibrio = (this.tempResistencia - 10);
-                    this.tempEvaporador += (equilibrio - this.tempEvaporador) * 0.005 * dt;
-                } else if (this.resistenciaLigada) {
-                    this.tempEvaporador += (this.tempResistencia - this.tempEvaporador) * 0.001 * dt;
-                } else {
-                    const taxaEvaporadorAmbiente = this.portaFreezerAberta ? 0.002 : 0.0001;
-                    this.tempEvaporador += (this.tempAmbiente - this.tempEvaporador) * taxaEvaporadorAmbiente * dt;
-                }
-
-                // Influência do evaporador na temperatura do freezer
-                const fatorTransferencia = this.ventoinhaFreezer ? 0.004 : 0.002;
-                this.tempFreezer += (this.tempEvaporador - this.tempFreezer) * fatorTransferencia * dt;
-
-                if (this.portaFreezerAberta) {
-                    const subidaBase = 0.0002;
-                    const fatorPorta = this.ventoinhaFreezer ? 0.005 : 0.002;
-                    this.tempFreezer += (this.tempAmbiente - this.tempFreezer) * fatorPorta * dt;
-                }
-            }
-
-            atualizarInterface() {
-                const statusDiv = document.getElementById("status");
-                const ligado = (estado) => estado ? '<span class="ativo">Ligado</span>' : '<span class="inativo">Desligado</span>';
-                const aberto = (estado) => estado ? '<span class="ativo">Aberta</span>' : '<span class="inativo">Fechada</span>';
-
-                statusDiv.innerHTML = `
+      atualizarInterface() {
+        document.getElementById("status").innerHTML = `
           <strong>Temperaturas:</strong><br>
           - Ambiente: ${this.tempAmbiente.toFixed(1)}°C<br>
           - Freezer: ${this.tempFreezer.toFixed(1)}°C<br>
@@ -159,112 +108,75 @@
           - Motor Compressor: ${this.tempMotor.toFixed(1)}°C<br><br>
 
           <strong>Componentes:</strong><br>
-          - Porta do Freezer: ${aberto(this.portaFreezerAberta)}<br>
-          - Porta da Geladeira: ${aberto(this.portaGeladeiraAberta)}<br>
-          - Compressor: ${ligado(this.compressorLigado)}<br>
-          - Resistência: ${ligado(this.resistenciaLigada)}<br>
-          - Ventoinha Compressor: ${ligado(this.ventoinhaCompressor)}<br>
-          - Ventoinha Freezer: ${ligado(this.ventoinhaFreezer)}<br>
-          - Luz Freezer: ${ligado(this.luzFreezer)}<br>
-          - Luz Geladeira: ${ligado(this.luzGeladeira)}<br><br>
-
-          <strong>Tempo Simulado por Segundo:</strong> ${(velocidadeSimulada * 0.1).toFixed(1)}s x ${velocidadeSimulada} ciclos
+          - Porta do Freezer: ${this.portaFreezerAberta ? 'Aberta' : 'Fechada'}<br>
+          - Porta da Geladeira: ${this.portaGeladeiraAberta ? 'Aberta' : 'Fechada'}<br>
+          - Compressor: ${this.compressorLigado ? 'Ligado' : 'Desligado'}<br>
+          - Resistência: ${this.resistenciaLigada ? 'Ligada' : 'Desligada'}<br>
         `;
+      }
+    }
+
+    const geladeira = new SimuladorGeladeira();
+    let pausado = false;
+
+    setInterval(() => {
+      if (!pausado) geladeira.atualizar(1);
+    }, 1000);
+
+    function togglePause() {
+      pausado = !pausado;
+      document.getElementById("pauseButton").innerText = pausado ? "Retomar" : "Pausar";
+    }
+
+    function toggleCompressor() { geladeira.compressorLigado = !geladeira.compressorLigado; }
+    function togglePortaFreezer() { geladeira.portaFreezerAberta = !geladeira.portaFreezerAberta; }
+    function togglePortaGeladeira() { geladeira.portaGeladeiraAberta = !geladeira.portaGeladeiraAberta; }
+    function toggleResistencia() { geladeira.resistenciaLigada = !geladeira.resistenciaLigada; }
+    function toggleVentoinhaCompressor() { geladeira.ventoinhaCompressor = !geladeira.ventoinhaCompressor; }
+    function toggleVentoinhaFreezer() { geladeira.ventoinhaFreezer = !geladeira.ventoinhaFreezer; }
+
+    function atualizarGrafico(amb, freezer, evap, res, motor) {
+      const ctx = document.getElementById('graficoTemperaturas').getContext('2d');
+      if (!window.grafico) {
+        window.grafico = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: [],
+            datasets: [
+              { label: 'Ambiente', borderColor: 'orange', data: [] },
+              { label: 'Freezer', borderColor: 'blue', data: [] },
+              { label: 'Evaporador', borderColor: 'cyan', data: [] },
+              { label: 'Resistência', borderColor: 'red', data: [] },
+              { label: 'Motor Compressor', borderColor: 'green', data: [] }
+            ]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: { title: { display: true, text: 'Temperatura (°C)' } },
+              x: { title: { display: true, text: 'Tempo (s)' } }
             }
-        }
-
-        const geladeira = new SimuladorGeladeira();
-        let velocidadeSimulada = 1;
-
-        function atualizarVelocidade() {
-            velocidadeSimulada = parseInt(document.getElementById("tempoSlider").value);
-            document.getElementById("tempoDisplay").innerText = (velocidadeSimulada * 0.1).toFixed(1) + "s";
-        }
-
-        let pausado = false;
-        let ultimoTempo = Date.now();
-
-        setInterval(() => {
-            if (!pausado) {
-                const agora = Date.now();
-                const deltaTempo = (agora - ultimoTempo) / 1000; // Tempo em segundos
-                ultimoTempo = agora;
-
-                for (let i = 0; i < velocidadeSimulada; i++) {
-                    geladeira.tick(deltaTempo); // Passa o tempo real decorrido
-                    geladeira.atualizarInterface();
-                    atualizarGrafico(geladeira.tempAmbiente, geladeira.tempFreezer, geladeira.tempEvaporador, geladeira.tempResistencia, geladeira.tempMotor);
-                }
-            }
-        }, 1000 / velocidadeSimulada);
-
-        function togglePause() {
-            pausado = !pausado;
-            const btn = document.getElementById("pauseButton");
-            btn.innerText = pausado ? "Retomar" : "Pausar";
-        }
-
-        // Controles
-        function toggleCompressor() { geladeira.compressorLigado = !geladeira.compressorLigado; }
-        function togglePortaFreezer() { geladeira.portaFreezerAberta = !geladeira.portaFreezerAberta; }
-        function togglePortaGeladeira() { geladeira.portaGeladeiraAberta = !geladeira.portaGeladeiraAberta; }
-        function toggleResistencia() { geladeira.resistenciaLigada = !geladeira.resistenciaLigada; }
-        function toggleVentoinhaCompressor() { geladeira.ventoinhaCompressor = !geladeira.ventoinhaCompressor; }
-        function toggleVentoinhaFreezer() { geladeira.ventoinhaFreezer = !geladeira.ventoinhaFreezer; }
-
-        // Gráfico de temperaturas
-        const ctx = document.getElementById('graficoTemperaturas').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [
-                    { label: 'Ambiente', data: [], borderWidth: 2 },
-                    { label: 'Freezer', data: [], borderWidth: 2 },
-                    { label: 'Evaporador', data: [], borderWidth: 2 },
-                    { label: 'Resistência', data: [], borderWidth: 2 },
-                    { label: 'Motor Compressor', data: [], borderWidth: 2 },
-                ]
-            },
-            options: {
-                responsive: true,
-                animation: false,
-                scales: {
-                    x: {
-                        title: { display: true, text: 'Tempo Simulado (s)' },
-                        ticks: {
-                            callback: function (value) {
-                                const s = parseFloat(this.getLabelForValue(value));
-                                const h = Math.floor(s / 3600);
-                                const m = Math.floor((s % 3600) / 60);
-                                const sec = Math.floor(s % 60);
-                                return `${h > 0 ? h + 'h ' : ''}${m > 0 ? m + 'm ' : ''}${sec}s`;
-                            }
-                        }
-                    },
-                    y: { title: { display: true, text: 'Temperatura (°C)' } }
-                }
-            }
+          }
         });
+      }
 
-        let tempoTotalSimulado = 0;
-        function atualizarGrafico(tempAmb, tempFreezer, tempEvap, tempRes, tempMotor) {
-            const maxPontos = 600;
-            const l = chart.data.labels.length;
-            tempoTotalSimulado += 1;
-            chart.data.labels.push(tempoTotalSimulado.toFixed(1));
-            chart.data.datasets[0].data.push(tempAmb);
-            chart.data.datasets[1].data.push(tempFreezer);
-            chart.data.datasets[2].data.push(tempEvap);
-            chart.data.datasets[3].data.push(tempRes);
-            chart.data.datasets[4].data.push(tempMotor);
-            if (l > maxPontos) {
-                chart.data.labels.shift();
-                chart.data.datasets.forEach(ds => ds.data.shift());
-            }
-            chart.update();
-        }
-    </script>
+      const grafico = window.grafico;
+      const tempo = grafico.data.labels.length;
+
+      grafico.data.labels.push(tempo);
+      grafico.data.datasets[0].data.push(amb);
+      grafico.data.datasets[1].data.push(freezer);
+      grafico.data.datasets[2].data.push(evap);
+      grafico.data.datasets[3].data.push(res);
+      grafico.data.datasets[4].data.push(motor);
+
+      if (grafico.data.labels.length > 300) {
+        grafico.data.labels.shift();
+        grafico.data.datasets.forEach(dataset => dataset.data.shift());
+      }
+
+      grafico.update();
+    }
+  </script>
 </body>
-
 </html>
