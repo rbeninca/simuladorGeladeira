@@ -29,6 +29,8 @@
             margin-top: 20px;
             font-size: 1.1em;
             line-height: 1.5;
+            display: flex;
+            justify-content: space-around;
         }
 
         .ativo {
@@ -177,14 +179,15 @@
 
             atualizarInterface() {
                 document.getElementById("status").innerHTML = `
+            <div class="status_temperaturas"> 
           <strong>Temperaturas:</strong><br>
           - Ambiente: ${this.tempAmbiente.toFixed(2)}°C<br>
           - Freezer: ${this.tempFreezer.toFixed(2)}°C<br>
           - Evaporador: ${this.tempEvaporador.toFixed(2)}°C<br>
           - Resistência: ${this.tempResistencia.toFixed(2)}°C<br>
           - Motor Compressor: ${this.tempMotor.toFixed(2)}°C<br><br>
-
-         
+            </div>
+            <div class="status_componentes">
             <strong>Estado:</strong><br>
             - Compressor: ${this.compressorLigado ? '<span class="ativo">Ligado</span>' : '<span class="inativo">Desligado</span>'}<br>
             - Resistência: ${this.resistenciaLigada ? '<span class="ativo">Ligada</span>' : '<span class="inativo">Desligada</span>'}<br>
@@ -198,7 +201,7 @@
             - Rele Termico Compressor vezes  : ${this.releTermicoAtutou}<br>
             - Rele Termico Acionado: ${this.releTermicoAcionado ? '<span class="ativo">Sim</span>' : '<span class="inativo">Não</span>'}<br>
             - Temperatura Rele Termico: ${this.tempReleTermico.toFixed(2)}°C<br>
-     
+            </
         `;
             }
         }
