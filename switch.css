@@ -1,5 +1,8 @@
 
-  /* The switch - the box around the slider */
+  /* The switch - the box around the slider 
+   link:https://stackoverflow.com/questions/39846282/how-to-add-the-text-on-and-off-to-toggle-button
+   autor:Goombah ,https://stackoverflow.com/users/3153338/goombah
+  */
 .switch {
     position: relative;
     display: inline-block;
@@ -79,3 +82,30 @@
   
   .slider.round:before {
     border-radius: 50%;}
+
+    .switch-label {
+        display: flex;
+        height: 2.5rem;
+        width: 100%;
+        justify-content: flex-end;
+        align-items: center;
+        text-align: end;
+        flex-wrap: nowrap;
+        box-shadow: 0 0 1px #2196F3;
+        border-radius: 8px;
+        background-color: #bcccff6b;
+    }
+    .switch-label span {
+        margin: 0 5px;
+    } /*fonte do texto*/
+    span.switch-label {
+        font-size: 14pt;
+        font-family: Verdana, sans-serif;
+        font-weight: bold;
+        
+    }
+    .switch-label span.switch-label {
+        font-size: 12px;
+        font-family: Verdana, sans-serif;
+        color: #fff;
+    }

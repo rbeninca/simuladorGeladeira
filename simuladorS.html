@@ -7,118 +7,115 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="inputs.css">
     <link rel="stylesheet" href="switch.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
 </head>
 
 <body>
     <div class="painel">
-        <div class="status" id="status">
-            <div id="statusComponentesSistema">
-                <h4>Componentes do Sistema</h4>
-                <label for="toggleCompressor">Compressor
-                    <label class="switch">
-                        <input type="checkbox" id="toggleCompressor">
-                        <div class="slider round">
-                            <span class="on">ON</span>
-                            <span class="off">OFF</span>
-                        </div>
-                    </label>
+        <div id="statusComponentesSistema">
+            <h4>Componentes do Sistema</h4>
+            <span>Compressor
+                <label class="switch">
+                    <input type="checkbox" id="toggleCompressor">
+                    <div class="slider round">
+                        <span class="on">ON</span>
+                        <span class="off">OFF</span>
+                    </div>
                 </label>
-                <label for="togglePortaFreezer">Porta Freezer
-                    <label class="switch">
-                        <input type="checkbox" id="togglePortaFreezer">
-                        <div class="slider round">
-                            <span class="on">ON</span>
-                            <span class="off">OFF</span>
-                        </div>
-                    </label>
+            </span>
+            <span for="togglePortaFreezer">Porta Freezer
+                <label class="switch">
+                    <input type="checkbox" id="togglePortaFreezer">
+                    <div class="slider round">
+                        <span class="on">ON</span>
+                        <span class="off">OFF</span>
+                    </div>
                 </label>
-                <label for="togglePortaGeladeira">Porta Geladeira
-                    <label class="switch">
-                        <input type="checkbox" id="togglePortaGeladeira">
-                        <div class="slider round">
-                            <span class="on">ON</span>
-                            <span class="off">OFF</span>
-                        </div>
-                    </label>
+            </span>
+            <span for="togglePortaGeladeira">Porta Geladeira
+                <label class="switch">
+                    <input type="checkbox" id="togglePortaGeladeira">
+                    <div class="slider round">
+                        <span class="on">ON</span>
+                        <span class="off">OFF</span>
+                    </div>
                 </label>
-                <label for="toggleResistencia">Resistência
-                    <label class="switch">
-                        <input type="checkbox" id="toggleResistencia">
-                        <div class="slider round">
-                            <span class="on">ON</span>
-                            <span class="off">OFF</span>
-                        </div>
-                    </label>
+            </span>
+            <span for="toggleResistencia">Resistência
+                <label class="switch">
+                    <input type="checkbox" id="toggleResistencia">
+                    <div class="slider round">
+                        <span class="on">ON</span>
+                        <span class="off">OFF</span>
+                    </div>
                 </label>
-                <label for="toggleVentoinhaCompressor">Ventoinha Compressor
-                    <label class="switch">
-                        <input type="checkbox" id="toggleVentoinhaCompressor">
-                        <div class="slider round">
-                            <span class="on">ON</span>
-                            <span class="off">OFF</span>
-                        </div>
-                    </label>
+            </span>
+            <span for="toggleVentoinhaCompressor">Ventoinha Compressor
+                <label class="switch">
+                    <input type="checkbox" id="toggleVentoinhaCompressor">
+                    <div class="slider round">
+                        <span class="on">ON</span>
+                        <span class="off">OFF</span>
+                    </div>
                 </label>
-                <label for="toggleVentoinhaFreezer">Ventoinha Freezer
-                    <label class="switch">
-                        <input type="checkbox" id="toggleVentoinhaFreezer">
-                        <div class="slider round">
-                            <span class="on">ON</span>
-                            <span class="off">OFF</span>
-                        </div>
-                    </label>
+            </span>
+            <span for="toggleVentoinhaFreezer">Ventoinha Freezer
+                <label class="switch">
+                    <input type="checkbox" id="toggleVentoinhaFreezer">
+                    <div class="slider round">
+                        <span class="on">ON</span>
+                        <span class="off">OFF</span>
+                    </div>
                 </label>
-                <label for="pauseButton">Pausar
-                    <label class="switch">
-                        <input type="checkbox" id="pauseButton">
-                        <div class="slider round">
-                            <span class="on">ON</span>
-                            <span class="off">OFF</span>
-                        </div>
-                    </label>
-                    <label for="velocidade">Velocidade
-                        <input type="range" id="velocidade" min="1" max="600" step="1" value="1">
-                        <span id="velocidadeValor">1x=1s </span>
-                    </label>
-                    
-
-
-
-
-
-            </div>
-            <div id="statusTemperatura">
-                <h4>Temperaturas</h4>
-                <div>
+            </span>
+            <span for="pauseButton">Pausar
+                <label class="switch">
+                    <input type="checkbox" id="pauseButton">
+                    <div class="slider round">
+                        <span class="on">ON</span>
+                        <span class="off">OFF</span>
+                    </div>
+                </label>
+                <br>
+                <label for="velocidade">Velocidade
+                    <input type="range" id="velocidade" min="1" max="100" step="1" value="1">
+                    <span id="velocidadeValor">1x=1s </span>
+                </label>
+        </div>
+        <div id="statusTemperatura">
+            <h4>Temperaturas</h4>
+            <div>
                 <label for="tempAmbiente"> Ambiente ºC</label>
                 <input type="text" id="tempAmbiente" value="0" disabled>
-                </div>
-            
-                <label for="tempFreezer">Freezer ºC</label>
-                <input type="text" id="tempFreezer" value="0" disabled>
-                <label for="tempEvaporador"> Evaporador ºC</label>
-                <input type="text" id="tempEvaporador" value="0" disabled>
-                <label for="tempResistencia"> Resistência ºC</label>
-                <input type="text" id="tempResistencia" value="0" disabled>
-                <label for="tempMotor"> Motor ºC</label>
-                <input type="text" id="tempMotor" value="0" disabled>
-                <label for="statusSistema">Status do Sistema</label>
-                <input type="text" id="statusSistema" value="Desligado" disabled>
-                <label for="statusSistema">Tempo Simulação</label>
-                <input type="text" id="tempoSimulacao" value="0" disabled>
-
-                <label for="statusSistema">Rele Térmico</label>
-                <input type="text" id="statusSistema" value="Desligado" disabled>
-                <label for="statusSistema"> Rele Térmico ºC</label>
-                <input type="text" id="statusSistema" value="0" disabled>
-
-
             </div>
 
+            <label for="tempFreezer">Freezer ºC</label>
+            <input type="text" id="tempFreezer" value="0" disabled>
+            <label for="tempEvaporador"> Evaporador ºC</label>
+            <input type="text" id="tempEvaporador" value="0" disabled>
+            <label for="tempResistencia"> Resistência ºC</label>
+            <input type="text" id="tempResistencia" value="0" disabled>
+            <label for="tempMotor"> Motor ºC</label>
+            <input type="text" id="tempMotor" value="0" disabled>
+            <label for="statusSistema">Status do Sistema</label>
+            <input type="text" id="statusSistema" value="Desligado" disabled>
+            <label for="statusSistema">Tempo Simulação</label>
+            <input type="text" id="tempoSimulacao" value="0" disabled>
+
+            <label for="statusSistema">Rele Térmico</label>
+            <input type="text" id="statusSistema" value="Desligado" disabled>
+            <label for="statusSistema"> Rele Térmico ºC</label>
+            <input type="text" id="statusSistema" value="0" disabled>
+
+
         </div>
-        <canvas id="graficoTemperaturas" ></canvas>
+
+        <div id="graficoTemperaturas"></div>
+
+
     </div>
+
     <script src="SimuladorGeladeira.js"></script>
     <script>
 
@@ -201,100 +198,128 @@
             let intervaloAtualizacao = 1000; // Atualiza a cada 50ms (20 vezes por segundo)
 
             function atualizarVelocidadeSimulacao(valor) {
-                fatorVelocidade = parseFloat(valor); // quanto tempo simulado por segundo real
+                fatorVelocidade = parseInt(valor);
                 document.getElementById('velocidadeValor').innerText =
-                    `1s real = ${fatorVelocidade.toFixed(2)}s simulados`;
+                    `1s real = ${fatorVelocidade} segundos simulados`;
             }
 
+
             // Chamadas regulares (sem precisar alterar o intervalo)
+            // Atualiza o sistema frigorífico a cada 1000ms
             setInterval(() => {
                 if (!pausado) {
-                    let dt = fatorVelocidade;
-                    // Atualiza o status do sistema
-                    geladeira.atualizar(dt);
-                    atualizarStatus();
-                    // Atualiza o gráfico com os dados mais recentes
-                    atualizarGrafico(geladeira.getTempoSimulacao(),
+                    for (let i = 0; i < fatorVelocidade; i++) {
+                        geladeira.atualizar(1); // Avança 1 segundo
+                        // Atualiza status dos controles
+                    }
+                }
+                atualizarStatus();
+            }, 1000); // Sistema: 1 segundo real
+
+            // Atualiza o gráfico 10 vezes por segundo (a cada 100ms)
+            setInterval(() => {
+                if (!pausado) {
+                    atualizarGrafico(
+                        geladeira.getTempoSimulacao(),
                         geladeira.temperaturaAmbiente,
                         geladeira.temperaturaFreezer,
                         geladeira.temperaturaEvaporador,
                         geladeira.temperaturaResistencia,
-                        geladeira.temperaturaCompressor);
+                        geladeira.temperaturaCompressor
+                    );
                 }
-            }, intervaloAtualizacao);
+            }, 1000); // Gráfico: 100ms = 10x por segundo
+
             // Atualiza o gráfico com os dados mais recentes
             function proximoEstadoSimulacao() {
-                geladeira.atualizar(fatorVelocidade);
+                geladeira.atualizar(1);
                 atualizarStatus();
-                // Atualiza o gráfico com os dados mais recentes
-                
-                atualizarGrafico(geladeira.getTempoSimulacao(),
-                 geladeira.temperaturaAmbiente,
-                 geladeira.temperaturaFreezer,
-                 geladeira.temperaturaEvaporador,
-                 geladeira.temperaturaResistencia,
-                 geladeira.temperaturaCompressor);
                 console.log(`Tempo: ${geladeira.getTempoSimulacao()}, Ambiente: ${geladeira.temperaturaAmbiente}, Freezer: ${geladeira.temperaturaFreezer}, Evaporador: ${geladeira.temperaturaEvaporador}, Resistência: ${geladeira.temperaturaResistencia}, Motor: ${geladeira.temperaturaCompressor}`);
 
             }
 
-          
+
+
+            let apexChart; // Variável global para guardar o gráfico
+
+
+
+
+            const LIMITE_PONTOS = 36000; // Máximo de 3000 pontos por série
 
             function atualizarGrafico(tempoSimulacao, amb, freezer, evap, res, motor) {
-               
-                const ctx = document.getElementById('graficoTemperaturas').getContext('2d');
-                if (!window.grafico) {
+                const container = document.getElementById('graficoTemperaturas');
 
-                    window.grafico = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: [],
-                            datasets: [
-                                { label: 'Ambiente', borderColor: 'orange', data: [] },
-                                { label: 'Freezer', borderColor: 'blue', data: [] },
-                                { label: 'Evaporador', borderColor: 'cyan', data: [] },
-                                { label: 'Resistência', borderColor: 'red', data: [] },
-                                { label: 'Motor Compressor', borderColor: 'green', data: [] }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            animation: false,
-
-                            scales: {
-                                y: { min:-35, max: 130, ticks: { stepSize: 5 },
-                                
-                                     title: { display: true, text: 'Temperatura (°C)' } },
-                                x: { title: { display: true, text: 'Tempo (s)' } }
+                if (!apexChart) {
+                    const options = {
+                        chart: {
+                            type: 'line',
+                            height: 400,
+                            animations: {
+                                enabled: true,
+                                easing: 'linear',
+                                dynamicAnimation: { speed: 1000 }
                             },
-                            plugins: {
-                                legend: { display: true, position: 'top' },
-                                title: { display: false, text: 'Simulador de Geladeira' }
+                            toolbar: {
+                                show: true,
+                                tools: {
+                                    zoom: true,
+                                    pan: true,
+                                    reset: true
+                                }
+                            },
+                            zoom: {
+                                enabled: true,
+                                type: 'x',
+                                autoScaleYaxis: true
                             }
+                        },
+                        series: [
+                            { name: 'Ambiente', data: [] },
+                            { name: 'Freezer', data: [] },
+                            { name: 'Evaporador', data: [] },
+                            { name: 'Resistência', data: [] },
+                            { name: 'Motor Compressor', data: [] }
+                        ],
+                        xaxis: {
+                            type: 'numeric',
+                            range: 100,
+                            title: { text: 'Tempo (s)' }
+                        },
+                        yaxis: {
+                            min: -35,
+                            max: 130,
+                            title: { text: 'Temperatura (°C)' }
+                        },
+                        legend: { position: 'top' }
+                    };
 
-                        }
-                    });
-                    
+                    apexChart = new ApexCharts(container, options);
+                    apexChart.render();
                 }
 
-                const grafico = window.grafico;
-                const tempo = grafico.data.labels.length;
-                //imprime os dados no console
-                console.log(`Tempo: ${tempoSimulacao}, Ambiente: ${amb}, Freezer: ${freezer}, Evaporador: ${evap}, Resistência: ${res}, Motor: ${motor}`);
-                grafico.data.labels.push(formatarTempo(tempoSimulacao)+`s`);
-                grafico.data.datasets[0].data.push(amb);
-                grafico.data.datasets[1].data.push(freezer);
-                grafico.data.datasets[2].data.push(evap);
-                grafico.data.datasets[3].data.push(res);
-                grafico.data.datasets[4].data.push(motor);
+                const seriesAtual = apexChart.w.config.series;
+                const tempoAtual = tempoSimulacao;
 
-                if (grafico.data.labels.length > 300) {
-                    grafico.data.labels.shift();
-                    grafico.data.datasets.forEach(dataset => dataset.data.shift());
-                }
+                // Adiciona novos dados
+                seriesAtual[0].data.push({ x: tempoAtual, y: amb });
+                seriesAtual[1].data.push({ x: tempoAtual, y: freezer });
+                seriesAtual[2].data.push({ x: tempoAtual, y: evap });
+                seriesAtual[3].data.push({ x: tempoAtual, y: res });
+                seriesAtual[4].data.push({ x: tempoAtual, y: motor });
 
-                grafico.update();
+                // Limita o número de pontos para não travar
+                seriesAtual.forEach(serie => {
+                    if (serie.data.length > LIMITE_PONTOS) {
+                        serie.data.shift(); // remove o ponto mais antigo
+                    }
+                });
+
+                apexChart.updateSeries(seriesAtual);
             }
+
+
+
 
         });
 
@@ -312,7 +337,8 @@
                 return `00:${segundos.toString().padStart(2, '0')}`;
             }
         }
-        
+
+
     </script>
 </body>
 
